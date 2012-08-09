@@ -15,7 +15,7 @@ module Mercurial
     def initialize(cmd, options={})
       @command    = cmd
       @repository = options[:repository]
-      @use_cache  = options[:cache].nil? || options[:cache] == false ? false : true
+      @use_cache  = options[:cache].nil? || (options[:cache] == false ? false : true)
       @timeout    = options[:timeout] ? options[:timeout].to_i : global_execution_timeout.to_i
     end
 
