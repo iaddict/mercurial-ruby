@@ -82,7 +82,7 @@ module Mercurial
 
     def debug(msg)
       if Mercurial.configuration.debug_mode
-        puts msg
+        Mercurial.configuration.logger.debug(msg)
       end
     end
     

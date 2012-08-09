@@ -16,15 +16,17 @@ module Mercurial
   # * shell_timeout — default execution timeout for all hg shell commands. Default is 3000.
   # * cache_store — Rails's CacheStore compatible class for caching results of successful hg commands. Default is nil.
   # * debug_mode — send all hg commands to stdout before execution. Default is false.
+  # * logger — defaults to a Logger instance that logs to stdout.
   #  
   class Configuration
     
-    attr_accessor :hg_binary_path, :shell_timeout, :cache_store, :debug_mode
+    attr_accessor :hg_binary_path, :shell_timeout, :cache_store, :debug_mode, :logger
     
     def initialize
       @hg_binary_path = '/usr/local/bin/hg'
       @shell_timeout  = 3000
       @debug_mode     = false
+      @logger         = Logger.new(STDOUT)
     end
     
   end
