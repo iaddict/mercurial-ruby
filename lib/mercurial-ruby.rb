@@ -33,6 +33,22 @@ module Mercurial
     end
   end
 
+  def self.start
+    require 'rubypython'
+    mercurial_path = File.expand_path('../../vendor/mercurial/', __FILE__)
+    python_exts_path = File.expand_path('../python_exts/', __FILE__)
+
+    RubyPython.start if RubyPython.python.nil?
+    RubyPython.import('pkg_resources') rescue nil
+    sys = RubyPython.import('sys')
+    
+    sys.path.insert(0, mercurial_path)
+    sys.path.insert(0, python_exts_path)
+    
+    RubyPython.import('mercurial.dispatch')
+    RubyPython.import('hg_run')
+  end
+
 end
 
 def require_local(suffix)

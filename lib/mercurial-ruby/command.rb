@@ -12,6 +12,31 @@ module Mercurial
   class Command
     attr_accessor :command, :repository, :use_cache, :timeout
     
+    def self.rubypython?
+      return @rubypython unless @rubypython.nil?
+      
+      begin
+        require 'rubypython'
+        mercurial_path = File.expand_path('../../../vendor/mercurial/', __FILE__)
+        python_exts_path = File.expand_path('../../python_exts/', __FILE__)
+
+        RubyPython.start if RubyPython.python.nil?
+        RubyPython.import('pkg_resources') rescue nil
+        sys = RubyPython.import('sys')
+        
+        sys.path.insert(0, mercurial_path)
+        sys.path.insert(0, python_exts_path)
+        
+        RubyPython.import('mercurial.dispatch')
+        RubyPython.import('hg_run')
+        
+        @rubypython = true
+      rescue LoadError
+        @rubypython = false
+      end
+      @rubypython
+    end
+    
     def initialize(cmd, options={})
       @command    = cmd
       @repository = options[:repository]
@@ -50,22 +75,10 @@ module Mercurial
     end
     
     def execution_proc
-      Proc.new do
-        debug(command)
-        result, error, = '', ''
-        status = Open4.popen4(command) do |pid, stdin, stdout, stderr|
-          Timeout.timeout(timeout) do
-            while tmp = stdout.read(102400)
-              result += tmp
-            end
-          end
-
-          while tmp = stderr.read(1024)
-            error += tmp
-          end
-        end
-        raise_error_if_needed(status, error)
-        result
+      if self.class.rubypython?
+        execution_proc_with_rubypython
+      else
+        execution_proc_without_rubypython
       end
     end
     
@@ -86,6 +99,36 @@ module Mercurial
       end
     end
     
+    def execution_proc_without_rubypython
+      Proc.new do
+        debug(command)
+        result, error, = '', ''
+        status = Open4.popen4(command) do |pid, stdin, stdout, stderr|
+          Timeout.timeout(timeout) do
+            while tmp = stdout.read(102400)
+              result += tmp
+            end
+          end
+
+          while tmp = stderr.read(1024)
+            error += tmp
+          end
+        end
+        raise_error_if_needed(status, error)
+        result
+      end
+    end
+    
+    def execution_proc_with_rubypython
+      Proc.new do
+        debug(command)
+        mercurial = RubyPython.import('hg_run')
+        error, output = mercurial.run(command).rubify
+        if error
+          raise CommandError, output
+        end
+        output
+      end
+    end
   end
-  
 end
