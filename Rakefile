@@ -18,9 +18,10 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/iSabanin/mercurial-ruby"
   gem.license = "MIT"
   gem.summary = %Q{Ruby API for Mercurial DVCS.}
-  gem.description = %Q{Ruby API for Mercurial DVCS.}
+  gem.description = %Q{Ruby API for Mercurial DVCS - enhanced with rubypython.}
   gem.email = "ilya.sabanin@gmail.com"
   gem.authors = ["Ilya Sabanin"]
+  gem.extensions << 'vendor/mercurial/Rakefile'
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
@@ -32,17 +33,17 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
-require 'rcov/rcovtask'
-Rcov::RcovTask.new do |test|
-  test.libs << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
-  test.rcov_opts << '--exclude "gems/*"'
-end
+#require 'rcov/rcovtask'
+#Rcov::RcovTask.new do |test|
+#  test.libs << 'test'
+#  test.pattern = 'test/**/test_*.rb'
+#  test.verbose = true
+#  test.rcov_opts << '--exclude "gems/*"'
+#end
 
 task :default => :test
 
-require 'rake/rdoctask'
+require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 

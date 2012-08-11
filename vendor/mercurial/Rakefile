@@ -1,0 +1,4 @@
+desc "build"
+task :default do
+  `make local`
+end
